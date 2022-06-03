@@ -1,4 +1,5 @@
-﻿using MailKit.Net.Smtp;
+﻿using EmailApp.Net.Models;
+using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -11,20 +12,16 @@ namespace EmailApp.Net.Controllers
     [ApiController]
     public class EmailController : ControllerBase
     {
-        [HttpPost]
-        public IActionResult SendEmail(string body)
-        {
-            var email = new MimeMessage();
-            email.From.Add(MailboxAddress.Parse("tristin.bashirian90@ethereal.email"));
-            email.To.Add(MailboxAddress.Parse("tristin.bashirian90@ethereal.email"));
-            email.Subject = "Test Email Subject";
-            email.Body = new TextPart(TextFormat.Html) { Text = body };
+        private readonly IEmailService _emailService;
 
-            using var smtp = new SmtpClient();
-            smtp.Connect("smtp.ethereal.email", 587, SecureSocketOptions.StartTls);
-            smtp.Authenticate("tristin.bashirian90@ethereal.email", "6NMnXhkgFKHxJktzs1");
-            smtp.Send(email);
-            smtp.Disconnect(true);
+        public EmailController (IEmailService emailService)
+        {
+            _emailService = emailService;
+        }
+        [HttpPost]
+        public IActionResult SendEmail(EmailDto request)
+        {
+            _emailService.SendEmail(request);
 
             return Ok();
         }
